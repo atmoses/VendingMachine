@@ -1,0 +1,20 @@
+Line 17		
+*Added private decimal PreviousBalance {get; set} => prop 
+
+Added DepositLog
+Added SalesLog
+Added MakeChangeLog
+
+Line 93 
+Added line PreviousBalance = Balance in Deposit()
+
++Line 186-188 (Balance is updated when an item is selected)
+In SelectItem() Added 	
+SelectedItem = selectedItem.Key;	
+PreviousBalance = Balance;
+Balance -= TotalDue;
+
+*Line 219-220 
+In ReturnChange() 	
+-delete decimal change = Balance - TotalDue;	
+-change change to Balance in the two lines below

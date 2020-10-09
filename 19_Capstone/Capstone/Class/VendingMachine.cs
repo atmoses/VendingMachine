@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Capstone.Class
@@ -11,7 +12,9 @@ namespace Capstone.Class
     {
         public decimal StartingBalance { get; private set; }
 
-        public decimal Balance { get; set; }
+        public decimal Balance { get; private set; }
+
+        private decimal PreviousBalance { get; set; } // Dean added 10/09/2020 10:50AM
 
         public string Selection { get; private set; }
 
@@ -22,7 +25,7 @@ namespace Capstone.Class
         public string ErrorMessage { get; private set; }
 
         public int NumberOfItemLeft { get; private set; } = 5;
-                
+
         public Dictionary<Item, int> inventory { get; private set; } = new Dictionary<Item, int>();
 
 
@@ -34,22 +37,22 @@ namespace Capstone.Class
             string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
             try
             {
-            using (StreamReader allItemsInTheMachine = new StreamReader(fullPath)) // Read from the data file and add items to the inventory"
-            {
-                while (!allItemsInTheMachine.EndOfStream)
+                using (StreamReader allItemsInTheMachine = new StreamReader(fullPath)) // Read from the data file and add items to the inventory"
                 {
-                    Item item = new Item();
-                    string[] eachItem = allItemsInTheMachine.ReadLine().Split("|");
-                    item.SlotLocation = eachItem[0];
-                    item.Name = eachItem[1];
-                    item.Price = decimal.Parse(eachItem[2]);
-                    item.Category = eachItem[3];
-                    inventory.Add(item, NumberOfItemLeft);
+                    while (!allItemsInTheMachine.EndOfStream)
+                    {
+                        Item item = new Item();
+                        string[] eachItem = allItemsInTheMachine.ReadLine().Split("|");
+                        item.SlotLocation = eachItem[0];
+                        item.Name = eachItem[1];
+                        item.Price = decimal.Parse(eachItem[2]);
+                        item.Category = eachItem[3];
+                        inventory.Add(item, NumberOfItemLeft);
+                    }
                 }
+
             }
-            
-            }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("OUT OF ORDER. Our deliver truck was lost in traffic.  Please help us relocate it.");
                 Console.WriteLine("Please check the path and date file name.");
@@ -78,7 +81,7 @@ Items In Stock:
 
 
 
-        public decimal Deposit(decimal deposit)
+        public void Deposit(decimal deposit)
         {
             if (deposit <= 0) // The use must always input a positive decimal number
             {
@@ -87,11 +90,10 @@ Items In Stock:
             }
             else
             {
+                PreviousBalance = Balance; // Dean added 10/09/2020 10:50AM
                 Balance += deposit;
-                            
+                //DepositLog();
             }
-            
-            return Balance;
         }
 
 
@@ -106,7 +108,7 @@ Items In Stock:
 
             foreach (KeyValuePair<Item, int> selectedItem in inventory)
             {
-                if(!(selectedItem.Key.SlotLocation == slotLocation))
+                if (!(selectedItem.Key.SlotLocation == slotLocation))
                 {
                     continue;
                 }
@@ -137,8 +139,8 @@ Items In Stock:
                 //{
                 //    ErrorMessage = "Item Does Not Exist. Please return to Purchase Menu and select again.";
                 //}
-                
-                
+
+
             }
             if (n == 0)
             {
@@ -151,7 +153,6 @@ Items In Stock:
 
         public void SelectItem(string slotLocation) // Commiting purchase before paying
         {
-            Item item = new Item();
             string selectionMessage = "";
 
             foreach (KeyValuePair<Item, int> selectedItem in inventory)
@@ -182,12 +183,13 @@ Items In Stock:
                     NumberOfItemLeft = selectedItem.Value;
                     NumberOfItemLeft--;
                     inventory[selectedItem.Key] = NumberOfItemLeft;
-                    SelectedItem = selectedItem.Key;
-                    Balance -= item.Price;
+                    SelectedItem = selectedItem.Key; // Dean added 10/09/2020 10:50AM
+                    PreviousBalance = Balance;  // Dean added 10/09/2020 10:50AM
+                    Balance -= TotalDue;    // Dean added 10/09/2020 10:50AM
                 }
                 break;
-                
-                
+
+
             }
             Console.WriteLine(selectionMessage); // Can CW here or creat another SelectionMessage prop in order to access from Purchase Menu            
         }
@@ -198,6 +200,7 @@ Items In Stock:
         {
             try
             {
+                //SalesLog();
                 Console.WriteLine($"You have purchased {SelectedItem.Name} for {SelectedItem.Price:c}. Thank you for your business!");
                 SelectedItem = new Item();
 
@@ -212,9 +215,9 @@ Items In Stock:
 
         public string[] ReturnChange()
         {
-            decimal change = Balance - TotalDue;
-            int numOfDollars = (int)(change * 100 / 100);
-            int centsForQuarters = (int)(change * 100 % 100);
+            //MakeChangeLog();
+            int numOfDollars = (int)(Balance * 100 / 100); // Dean changed 10/09/2020 10:50AM
+            int centsForQuarters = (int)(Balance * 100 % 100); // Dean changed 10/09/2020 10:50AM
             int numOfQuarters = centsForQuarters / 25;
             int centsForDimes = centsForQuarters % 25;
             int numOfDime = centsForDimes / 10;
@@ -226,5 +229,72 @@ Items In Stock:
             Balance = 0;
             return changes;
         }
+
+
+        private void DepositLog()
+        {
+            string fileName = "";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamWriter newLog = new StreamWriter(fullPath, true))
+                {
+                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {"FEED MONEY:",-12} {PreviousBalance,-6:c} {Balance:c}");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Out of printing paper. Please help us putting more!");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
+
+
+
+        private void SalesLog()
+        {
+            string fileName = "";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamWriter newLog = new StreamWriter(fullPath, true))
+                {
+                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {SelectedItem.Name + " " + SelectedItem.SlotLocation,-12} {PreviousBalance,-6:c} {Balance:c}");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Out of printing paper. Please help us putting more!");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
+
+
+
+        private void MakeChangeLog()
+        {
+            string fileName = "";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamWriter newLog = new StreamWriter(fullPath, true))
+                {
+                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {"GIVE CHANGE:",-12} {Balance,-6:c} {0:c}");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Out of printing paper. Please help us putting more!");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
     }
+
+
 }
