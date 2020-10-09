@@ -7,9 +7,16 @@ namespace Capstone.Class
 {
     public class PurchaseMenu : ConsoleMenu
     {
+        public VendingMachine vendingMachine = new VendingMachine();
+        //private static MenuOptionResult DisplayBalance()
+        //{
+        //    Console.WriteLine("this is a test");
+        //    return MenuOptionResult.WaitAfterMenuSelection;
+        //}
         public PurchaseMenu()
         {
-            AddOption("Feed Money", AddToBalance);
+            
+            AddOption($"Feed Money: {vendingMachine.Balance}", AddToBalance);
             AddOption("Select Product", SelectItemToPurchase);
             AddOption("Finish Purchase", FinishPurchase);
         }
@@ -24,11 +31,23 @@ namespace Capstone.Class
             throw new NotImplementedException();
         }
 
-        private MenuOptionResult AddToBalance()
+        public MenuOptionResult AddToBalance()
         {
-            AddToBalance addToBalance = new AddToBalance();
-            addToBalance.Show();
-            return MenuOptionResult.DoNotWaitAfterMenuSelection;
+            
+            Console.WriteLine("Please Enter The Amount You Would Like to Deposit:");
+            string deposit = Console.ReadLine();
+            int amount = int.Parse(deposit);
+            if (amount == 1 || amount == 2 || amount == 5 || amount == 10)
+            {
+                vendingMachine.Deposit(amount);
+                Console.WriteLine($"Your Balance is Now: {vendingMachine.Balance}");
+            }
+            else
+            {
+                Console.WriteLine("Sorry this bill can not be used");
+            }
+            return MenuOptionResult.WaitAfterMenuSelection;
         }
+        
     }
 }

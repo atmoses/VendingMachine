@@ -88,6 +88,7 @@ Items In Stock:
             else
             {
                 Balance += deposit;
+                            
             }
             
             return Balance;
@@ -150,6 +151,7 @@ Items In Stock:
 
         public void SelectItem(string slotLocation) // Commiting purchase before paying
         {
+            Item item = new Item();
             string selectionMessage = "";
 
             foreach (KeyValuePair<Item, int> selectedItem in inventory)
@@ -181,7 +183,7 @@ Items In Stock:
                     NumberOfItemLeft--;
                     inventory[selectedItem.Key] = NumberOfItemLeft;
                     SelectedItem = selectedItem.Key;
-                    Balance -= TotalDue;
+                    Balance -= item.Price;
                 }
                 break;
                 
