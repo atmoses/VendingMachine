@@ -16,31 +16,57 @@ namespace Capstone.Class
         public PurchaseMenu()
         {
             
-            AddOption($"Feed Money: {vendingMachine.Balance}", AddToBalance);
+            AddOption($"Feed Money", AddToBalance);
             AddOption("Select Product", SelectItemToPurchase);
             AddOption("Finish Purchase", FinishPurchase);
+
+            
+        }
+        protected override void OnBeforeShow()
+        {
+            base.OnBeforeShow();
+            Console.WriteLine($"Current Balance is: {vendingMachine.Balance:C}");
         }
 
         private MenuOptionResult FinishPurchase()
         {
-            throw new NotImplementedException();
+            if(vendingMachine.Balance > 0)
+            {
+                Console.WriteLine($"Change Due: {vendingMachine.Balance:c}");
+                int quarters = (int)(vendingMachine.Balance / .25M);
+                vendingMachine.Balance -= quarters * .25M;
+                int dimes = (int)(vendingMachine.Balance / .1M);
+                vendingMachine.Balance -= dimes * .1M;
+                int nickels = (int)(vendingMachine.Balance / .05M);
+                vendingMachine.Balance -= nickels * .05M;
+                int pennies = (int)(vendingMachine.Balance / .01M);
+                vendingMachine.Balance -= pennies * .01M;
+                Console.WriteLine($"Quarters: {quarters},");
+                Console.WriteLine($"Dimes: {dimes},");
+                Console.WriteLine($"Nickels: {nickels},");
+                Console.WriteLine($"Pennies: {pennies}");
+                return MenuOptionResult.WaitAfterMenuSelection;
+            }
+            return MenuOptionResult.WaitAfterMenuSelection;
+
         }
 
         private MenuOptionResult SelectItemToPurchase()
         {
-            throw new NotImplementedException();
+            string selectedItem = Console.ReadLine();
+            vendingMachine.EligibleToSelect(selectedItem);
+            vendingMachine.SelectItem(selectedItem);
+            return MenuOptionResult.WaitAfterMenuSelection;
         }
 
         public MenuOptionResult AddToBalance()
         {
             
-            Console.WriteLine("Please Enter The Amount You Would Like to Deposit:");
-            string deposit = Console.ReadLine();
-            int amount = int.Parse(deposit);
+            int amount = GetInteger("Please Enter The Amount You Would Like to Deposit:");
             if (amount == 1 || amount == 2 || amount == 5 || amount == 10)
             {
                 vendingMachine.Deposit(amount);
-                Console.WriteLine($"Your Balance is Now: {vendingMachine.Balance}");
+                Console.WriteLine($"Your Balance is Now: {vendingMachine.Balance:C}");
             }
             else
             {

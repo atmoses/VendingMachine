@@ -12,7 +12,7 @@ namespace Capstone.Class
     {
         public decimal StartingBalance { get; private set; }
 
-        public decimal Balance { get; private set; }
+        public decimal Balance { get; set; }
 
         private decimal PreviousBalance { get; set; } // Dean added 10/09/2020 10:50AM
 
@@ -157,41 +157,51 @@ Items In Stock:
 
             foreach (KeyValuePair<Item, int> selectedItem in inventory)
             {
-                if (!(selectedItem.Key.SlotLocation == slotLocation))
+                if (TotalDue > Balance) //Aiden added
                 {
-                    continue;
+                    Console.WriteLine("Please add additional funds");
+                    break;
                 }
-                else if (selectedItem.Key.SlotLocation == slotLocation)
+                else if (TotalDue <= Balance) //Aiden added
                 {
-                    TotalDue = selectedItem.Key.Price;
-                    if (selectedItem.Key.Category.ToLower() == "chip")
+                    if (!(selectedItem.Key.SlotLocation == slotLocation))
                     {
-                        selectionMessage = "Crunch Crunch, Yum!";
+                        continue;
                     }
-                    if (selectedItem.Key.Category.ToLower() == "candy")
+                    else if (selectedItem.Key.SlotLocation == slotLocation)
                     {
-                        selectionMessage = "Munch Munch, Yum!";
+                        TotalDue = selectedItem.Key.Price;
+                        if (selectedItem.Key.Category.ToLower() == "chip")
+                        {
+                            selectionMessage = "Crunch Crunch, Yum!";
+                        }
+                        if (selectedItem.Key.Category.ToLower() == "candy")
+                        {
+                            selectionMessage = "Munch Munch, Yum!";
+                        }
+                        if (selectedItem.Key.Category.ToLower() == "drink")
+                        {
+                            selectionMessage = "Glug Glug, Yum!";
+                        }
+                        if (selectedItem.Key.Category.ToLower() == "gum")
+                        {
+                            selectionMessage = "Chew Chew, Yum!";
+                        }
+
+                        NumberOfItemLeft = selectedItem.Value;
+                        NumberOfItemLeft--;
+                        inventory[selectedItem.Key] = NumberOfItemLeft;
+                        SelectedItem = selectedItem.Key; // Dean added 10/09/2020 10:50AM
+                        PreviousBalance = Balance;  // Dean added 10/09/2020 10:50AM
+                        Balance -= TotalDue;    // Dean added 10/09/2020 10:50AM
                     }
-                    if (selectedItem.Key.Category.ToLower() == "drink")
-                    {
-                        selectionMessage = "Glug Glug, Yum!";
-                    }
-                    if (selectedItem.Key.Category.ToLower() == "gum")
-                    {
-                        selectionMessage = "Chew Chew, Yum!";
-                    }
-                    NumberOfItemLeft = selectedItem.Value;
-                    NumberOfItemLeft--;
-                    inventory[selectedItem.Key] = NumberOfItemLeft;
-                    SelectedItem = selectedItem.Key; // Dean added 10/09/2020 10:50AM
-                    PreviousBalance = Balance;  // Dean added 10/09/2020 10:50AM
-                    Balance -= TotalDue;    // Dean added 10/09/2020 10:50AM
+                    break;
                 }
-                break;
+                Console.WriteLine(selectionMessage);
 
 
             }
-            Console.WriteLine(selectionMessage); // Can CW here or creat another SelectionMessage prop in order to access from Purchase Menu            
+             // Can CW here or creat another SelectionMessage prop in order to access from Purchase Menu            
         }
 
 
@@ -213,7 +223,7 @@ Items In Stock:
 
 
 
-        public string[] ReturnChange()
+       /* public string[] ReturnChange()   //This section isn't needed
         {
             //MakeChangeLog();
             int numOfDollars = (int)(Balance * 100 / 100); // Dean changed 10/09/2020 10:50AM
@@ -224,11 +234,12 @@ Items In Stock:
             int centsForNickels = centsForDimes % 10;
             int numOfNickels = centsForNickels / 5;
             int cents = centsForNickels % 5;
-            string[] changes = { numOfDollars.ToString(), numOfQuarters.ToString(), numOfDime.ToString(), numOfNickels.ToString(), cents.ToString() };
-            Console.WriteLine("Returning {change:c}.");
+            string[] changes = new string[]
+            { numOfDollars.ToString(), numOfQuarters.ToString(), numOfDime.ToString(), numOfNickels.ToString(), cents.ToString() };
+            Console.WriteLine($"Returning {changes}.");
             Balance = 0;
             return changes;
-        }
+        } */
 
 
         private void DepositLog()
