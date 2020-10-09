@@ -5,35 +5,23 @@ using System.Text;
 
 namespace Capstone.Class
 {
-   public class AddToBalance : ConsoleMenu
+    public class AddToBalance : ConsoleMenu
     {
         public AddToBalance()
         {
-            AddOption("$1", AddOneDollar);
-            AddOption("$2", AddTwoDollar);
-            AddOption("$5", AddFiveDollar);
-            AddOption("$10", AddTenDollar);
-
-        }
-
-        private MenuOptionResult AddTenDollar()
-        {
-            throw new NotImplementedException();
-        }
-
-        private MenuOptionResult AddFiveDollar()
-        {
-            throw new NotImplementedException();
-        }
-
-        private MenuOptionResult AddTwoDollar()
-        {
-            throw new NotImplementedException();
-        }
-
-        private MenuOptionResult AddOneDollar()
-        {
-            throw new NotImplementedException();
+            VendingMachine vendingMachine = new VendingMachine();
+            Console.WriteLine("Please Enter The Amount You Would Like to Deposit:");
+            string deposit = Console.ReadLine();
+            int amount = int.Parse(deposit);
+            if (amount == 1 || amount == 2 || amount == 5 || amount == 10)
+            {
+                vendingMachine.Deposit(amount);
+            }
+            else
+            {
+                Console.WriteLine("Sorry this bill can not be used");
+            }
+            AddOption("Return to Make Purchase",);
         }
     }
 }

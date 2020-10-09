@@ -11,6 +11,12 @@ namespace Capstone.Class
         {
             AddOption("Feed Money", AddToBalance);
             AddOption("Select Product", SelectItemToPurchase);
+            AddOption("Finish Purchase", FinishPurchase);
+        }
+
+        private MenuOptionResult FinishPurchase()
+        {
+            throw new NotImplementedException();
         }
 
         private MenuOptionResult SelectItemToPurchase()
@@ -20,7 +26,9 @@ namespace Capstone.Class
 
         private MenuOptionResult AddToBalance()
         {
-            throw new NotImplementedException();
+            AddToBalance addToBalance = new AddToBalance();
+            addToBalance.Show();
+            return MenuOptionResult.DoNotWaitAfterMenuSelection;
         }
     }
 }

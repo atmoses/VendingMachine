@@ -15,11 +15,13 @@ namespace Capstone.Class
 
             Configure(cfg =>
             {
-                cfg.Title = "Welcome to Vendo-Matic 800";
+                cfg.Title = $"Welcome to Vendo-Matic 800, your balance is ";
             });
 
             
         }
+        
+
 
         private MenuOptionResult MakePurchase()
         {
@@ -32,6 +34,7 @@ namespace Capstone.Class
         {
             VendingMachine vendingMachine = new VendingMachine();
             Console.WriteLine($"{vendingMachine.DisplayItems()}");
+            
             return MenuOptionResult.WaitAfterMenuSelection;
         }
     }

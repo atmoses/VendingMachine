@@ -11,7 +11,7 @@ namespace Capstone.Class
     {
         public decimal StartingBalance { get; private set; }
 
-        public decimal Balance { get; private set; }
+        public decimal Balance { get; set; }
 
         public string Selection { get; private set; }
 
@@ -78,7 +78,7 @@ Items In Stock:
 
 
 
-        public void Deposit(decimal deposit)
+        public decimal Deposit(decimal deposit)
         {
             if (deposit <= 0) // The use must always input a positive decimal number
             {
@@ -89,6 +89,8 @@ Items In Stock:
             {
                 Balance += deposit;
             }
+            
+            return Balance;
         }
 
 
@@ -179,6 +181,7 @@ Items In Stock:
                     NumberOfItemLeft--;
                     inventory[selectedItem.Key] = NumberOfItemLeft;
                     SelectedItem = selectedItem.Key;
+                    Balance -= TotalDue;
                 }
                 break;
                 
