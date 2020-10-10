@@ -33,8 +33,8 @@ namespace Capstone.Class
         private MenuOptionResult OpenInventory()
         {
             VendingMachine vendingMachine = new VendingMachine();
-            Console.WriteLine($"{vendingMachine.DisplayItems()}");
-            
+            //Console.WriteLine($"{vendingMachine.DisplayItems()}"); // Got rid of the extra line at the end of the list
+            vendingMachine.DisplayItems();
             return MenuOptionResult.WaitAfterMenuSelection;
         }
     }

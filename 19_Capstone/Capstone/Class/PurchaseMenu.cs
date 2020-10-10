@@ -30,6 +30,7 @@ namespace Capstone.Class
 
         private MenuOptionResult FinishPurchase()
         {
+            vendingMachine.ReturnChange();
             if(vendingMachine.Balance > 0)
             {
                 Console.WriteLine($"Change Due: {vendingMachine.Balance:c}");
@@ -53,9 +54,23 @@ namespace Capstone.Class
 
         private MenuOptionResult SelectItemToPurchase()
         {
-            string selectedItem = Console.ReadLine();
-            vendingMachine.EligibleToSelect(selectedItem);
-            vendingMachine.SelectItem(selectedItem);
+            vendingMachine.DisplayItems();
+            Console.WriteLine();
+            Console.Write("Please enter your selection: ");
+            string selectedItem = Console.ReadLine();            
+            if (selectedItem == "")
+            {
+                Console.WriteLine("You have not selected anything yet. Please press Enter and select an item to purchase!");
+            }
+            else if (vendingMachine.EligibleToSelect(selectedItem) == 3)
+            {
+                vendingMachine.SelectItem(selectedItem);
+            }
+            else
+            {
+                Console.WriteLine(vendingMachine.ErrorMessage);
+            }            
+            vendingMachine.Checkout();
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 

@@ -1,3 +1,52 @@
+<VendingMachine>
+Line 16:
+Commented out StartingBalance prop
+Line 18:
+Added private AccumulativeSale prop
+Line 26:
+Added private decimal PreviousBalance prop
+Line 37:
+Added soldItem Dictionary
+Line 70:
+Added ReadPreviousSalesReport() in Ctor => see private method
+Line 92:
+Added DepositLog() => see private method
+Line 205-208:
+Moved SalesLog(), AddedToSoldItems(), Update the sales report there
+Line 262:
+Added GiveChangeLog()
+
+GenerateSalesReport()
+	-@Aiden, you can add a hidden call to print out the SalesReport.txt from Main Menu (DO NOT call it - it has been generated along the transaction => see Line 199)
+	-I am happy to plug in the StreamReader codes, if you would like, after you set up the hidden option the in the Main Menu
+
+!!!Line 20:
+-Had to make Balance prop {get;set;} in VM Class instead of {get; private set;} to make FinishPurchase() work in <PurchaseMenu>
+-Would rather have Balance prop {get; private set;} so that it will not be albe to be modified outside of the VendingMachine Class  - for "virtual" security reason
+-Also still need to keep ReturnChange() method so that the GiveChangeLog() works within the class and keep the GiveChangeLog() private.
+-Would you mind moving your codes under FinishPurchase() in <PurchaseMenu> into the VendingMachine Class?  You may move them under ReturnChange() or you can keep FinishPurchase() name in the VM class
+
+@Aiden: In Purchabe Menu and after the change is returned, is there anyway to add a line saying "Please press ESC to return to Main Menu?"  I took me a while to figure out to get back to Main.  Thought it would be nicer to make it clear for the users.  Thank you!!! 
+
+
+<MainMenu>
+Line 36:
+Fixed the extra line on the bottom of the list
+
+<Purchase Menu>
+Line 33: 
+Added ReturnChange(); see above Line 20 <VendingMaching>
+Line 57:
+Added vendingMachine.DisplayItems() => it was blank after enterting Select Item
+Line 61-72:
+Added the if statement to excute the EligibleToSelect() with appropriate conditions
+Line 73:
+Added Checkout() => clear SelectedItem
+
+
+
+=================================================================================================
+[Done]
 Line 17		
 *Added private decimal PreviousBalance {get; set} => prop 
 
