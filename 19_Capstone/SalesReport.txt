@@ -1,13 +1,19 @@
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-$ Vendo - Matic 800 Sales Report on 10/10/2020 10:43:33 PM $
+$ Vendo - Matic 800 Sales Report on 10/11/2020 10:07:24 AM $
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-Triplemint          |41
-Potato Crisps       |6
-U-Chews             |3
-Stackers            |2
-Chiclets            |1
-Dr. Salt            |1
-Little League Chew  |1
+Triplemint          |50
+Chiclets            |11
+U-Chews             |13
+Potato Crisps       |25
+Stackers            |12
+Dr. Salt            |70
+Crunchie            |30
+Mountain Melter     |60
+Moonpie             |10
+Cloud Popcorn       |10
+Heavy               |11
+Wonka Bar           |11
+Grain Waves         |10
 
-TOTAL SALE: $57.70
+TOTAL SALE: $512.95
