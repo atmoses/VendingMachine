@@ -1,3 +1,24 @@
+Furbished our vending machine - let me know what you think!
+
+<MainMenu>
+Added Print Sales Report()
+
+<PurchaseMenu>
+-Updated case-insensitive for SlotLocation input
+-Move Aiden's coin returning codes(great jobs with that block of codes!) to ReturnChange() in <VM>
+	- Only shows the positive number of the returned coins => no need to show returning 0 dime, 0 penny, etc.
+
+Added prompts for users to push ENTER or ESC to nagivate between menus
+
+<VM>
+Fixed alignment for Display() and log.txt
+Sorted the SalesReport.txt by the number of sold items 
+Sorted methods and props in alphabetical order
+
+Tests writing Sunday!!!
+
++++++++++++++++++++++++++++++++++++++++++++++++
+[Done]
 <VendingMachine>
 Line 16:
 Commented out StartingBalance prop

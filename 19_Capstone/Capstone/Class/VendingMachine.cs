@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Transactions;
 
 namespace Capstone.Class
 {
@@ -15,13 +16,11 @@ namespace Capstone.Class
     {
         //public decimal StartingBalance { get; private set; } //Dean commented out 10/09/2020 6:15PM
 
-        private decimal AccumulativeSale { get; set; }
-
-        public decimal Balance { get; set; }
+        public decimal Balance { get; private set; }
 
         public string ErrorMessage { get; private set; }
 
-        public int NumberOfItemLeft { get; private set; } = 5;
+        public int NumberOfItemLeft { get; private set; }
 
         private decimal PreviousBalance { get; set; } // Dean added 10/09/2020 10:50AM
 
@@ -29,6 +28,7 @@ namespace Capstone.Class
 
         public decimal TotalDue { get; private set; }
 
+        private decimal UpToDateSales { get; set; }
 
         public Item SelectedItem { get; private set; }
 
@@ -41,9 +41,25 @@ namespace Capstone.Class
 
         public VendingMachine() // "Turn it on!"
         {
-            string fileName = "vendingmachine.csv";
+            int n;
+            string fileName;
             string currentFolder = Environment.CurrentDirectory;
+            string path = Path.Combine(currentFolder, @"..\..\..\..\");
+            if (File.Exists(Path.Combine(path, "vendingmachineCurrent.txt")))
+            {
+                fileName = "vendingmachineCurrent.txt";
+                n = 1;
+            }
+            else
+            {
+                fileName = "vendingmachine.csv";
+                n = 0;
+            }
+
+            currentFolder = Environment.CurrentDirectory;
             string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+
+
             try
             {
                 using (StreamReader allItemsInTheMachine = new StreamReader(fullPath)) // Read from the data file and add items to the inventory"
@@ -56,6 +72,14 @@ namespace Capstone.Class
                         item.Name = eachItem[1];
                         item.Price = decimal.Parse(eachItem[2]);
                         item.Category = eachItem[3];
+                        if (n == 0)
+                        {
+                            NumberOfItemLeft = 5;
+                        }
+                        else
+                        {
+                            NumberOfItemLeft = Int32.Parse(eachItem[4]);
+                        }
                         inventory.Add(item, NumberOfItemLeft);
                     }
                 }
@@ -68,28 +92,35 @@ namespace Capstone.Class
                 Console.WriteLine($"Error: {e.Message}");
             }
             ReadPreviousSalesReport();
-        }
-
-
-        public List<string> DisplayItems()
-        {
-            List<string> allSlotLocations = new List<string>(); // Creat a list for the purpose of testing
-            Console.WriteLine(@"
-***************
-Items In Stock:
-***************
-");
-            foreach (KeyValuePair<Item, int> eachItem in inventory)
+            if (File.Exists(Path.Combine(path, "CurrentUserInfo.txt")))
             {
-                Console.WriteLine($"{eachItem.Key.SlotLocation,-4}{eachItem.Key.Name,-20}{eachItem.Key.Price:c}");
-                string itemSlotLocation = eachItem.Key.SlotLocation;
-                allSlotLocations.Add(itemSlotLocation);
+                ReadCurrentUserLog();
             }
-            return allSlotLocations;
         }
 
 
-        public void Deposit(decimal deposit)
+
+        public void Checkout() // Empty the SelectedItem Dictionary and "print out" a receipt; Dean added SalesLog(), AddtoSoldItem() and GenerateSalesReport() => see private methods 
+        {
+            //try
+            //{
+            //SalesLog();            
+            //AddToSoldItems();
+            //Console.WriteLine($"You have purchased {SelectedItem.Name} for {SelectedItem.Price:c}. Thank you for your business!");
+
+            //GenerateSalesReport();
+            //ClearUserLog();
+            SelectedItem = new Item();
+
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine($"Error: {e.Message} while printing receipt. Checkout failed.");
+            //}
+        }
+
+
+        public void Deposit(decimal deposit) //Dean added DepositLog() 10/09/2020 6:21PM
         {
             if (deposit <= 0) // The use must always input a positive decimal number
             {
@@ -102,7 +133,29 @@ Items In Stock:
                 Balance += deposit;
                 DepositLog();
             }
-        }//Dean added DepositLog() 10/09/2020 6:21PM
+
+            CurrentUserLog();
+        } //Dean added DepositLog() 10/09/2020 6:21PM
+
+
+        public List<string> DisplayItems()
+        {
+            List<string> allSlotLocations = new List<string>(); // Creat a list for the purpose of testing
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+*****************************
+       Items In Stock
+*****************************
+");
+            foreach (KeyValuePair<Item, int> eachItem in inventory)
+            {
+                Console.WriteLine($"{eachItem.Key.SlotLocation,-4}{eachItem.Key.Name,-20}{eachItem.Key.Price:c}");
+                string itemSlotLocation = eachItem.Key.SlotLocation;
+                allSlotLocations.Add(itemSlotLocation);
+            }
+            Console.ResetColor();
+            return allSlotLocations;
+        }
 
 
         public int EligibleToSelect(string slotLocation) // Can acess/CW ErrorMessage either from the VM class or PurchaseMenu Class
@@ -131,14 +184,14 @@ Items In Stock:
                         else
                         {
                             n = 2;
-                            ErrorMessage = "Item selected out of stock. Please return to Purchase Menu and select again.";
+                            ErrorMessage = "Item selected out of stock. Please press ENTER and return to <Purchase Menu> and select again.";
                             break;
                         }
                     }
                     else
                     {
                         n = 1;
-                        ErrorMessage = "Not Enough Balance for this Item.  Please return to Main Menu to deposit more money.";
+                        ErrorMessage = "Not Enough Balance for this Item.  Please Press ENTER and return to <Purchase Menu> to deposit more money.";
                         break;
                     }
                 }
@@ -151,9 +204,96 @@ Items In Stock:
             }
             if (n == 0)
             {
-                ErrorMessage = "Item Does Not Exist. Please return to Purchase Menu and select again.";
+                ErrorMessage = "Item Does Not Exist. Please return to <Purchase Menu> and select again.";
             }
             return n;
+        }
+
+
+        public void GenerateSalesReport()
+        {
+            string fileName = "SalesReport.txt";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            IOrderedEnumerable<KeyValuePair<Item, int>> sortedSoldItems = from entry in soldItems orderby entry.Value descending select entry;
+
+            using (StreamWriter newReport = new StreamWriter(fullPath, false))
+            {
+                newReport.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                newReport.WriteLine($"$ Vendo - Matic 800 Sales Report on {DateTime.Now:MM/dd/yyyy hh:mm:ss tt} $");
+                newReport.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                newReport.WriteLine();
+                foreach (KeyValuePair<Item, int> soldItem in sortedSoldItems)
+                {
+                    newReport.WriteLine($"{soldItem.Key.Name,-20}|{soldItem.Value}");
+                    UpToDateSales += soldItem.Key.Price * soldItem.Value;
+                }
+
+                newReport.WriteLine();
+                newReport.WriteLine($"TOTAL SALE: {UpToDateSales:c}");
+            }
+
+        }
+
+
+        public void ReturnChange() //Dean added GiveChangeLog() 10/09/2020 6:25PM;
+        {
+            GiveChangeLog();
+            //int numOfDollars = (int)(Balance * 100 / 100); // Dean changed 10/09/2020 10:50AM
+            //int centsForQuarters = (int)(Balance * 100 % 100); // Dean changed 10/09/2020 10:50AM
+            //int numOfQuarters = centsForQuarters / 25;
+            //int centsForDimes = centsForQuarters % 25;
+            //int numOfDime = centsForDimes / 10;
+            //int centsForNickels = centsForDimes % 10;
+            //int numOfNickels = centsForNickels / 5;
+            //int cents = centsForNickels % 5;
+            //string[] changes = { numOfDollars.ToString(), numOfQuarters.ToString(), numOfDime.ToString(), numOfNickels.ToString(), cents.ToString() };
+            //Console.WriteLine("Returning {change:c}.");
+            //Balance = 0;
+            //return changes;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("$$$$$$$$$$$$$$$$$$$");
+            Console.WriteLine();
+            if (Balance > 0)
+            {
+                Console.WriteLine($"Change Due: {Balance:c}");
+                int quarters = (int)(Balance / .25M);
+                Balance -= quarters * .25M;
+                int dimes = (int)(Balance / .1M);
+                Balance -= dimes * .1M;
+                int nickels = (int)(Balance / .05M);
+                Balance -= nickels * .05M;
+                int pennies = (int)(Balance / .01M);
+                Balance -= pennies * .01M;
+
+
+                if (quarters > 0)
+                {
+                    Console.WriteLine($"{"Quarters:",-12}{quarters}");
+                }
+                if (dimes > 0)
+                {
+                    Console.WriteLine($"{"Dimes:",-12}{dimes}");
+                }
+                if (nickels > 0)
+                {
+                    Console.WriteLine($"{"Nickels:",-12}{nickels}");
+                }
+                if (pennies > 0)
+                {
+                    Console.WriteLine($"{"Pennies:",-12}{pennies}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No Change Returned.");
+            }
+            ClearUserLog();
+            Console.WriteLine();
+            Console.WriteLine("$$$$$$$$$$$$$$$$$$$");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine("Press ENTER to return to <Purchase Menu>.");
         }
 
 
@@ -172,29 +312,25 @@ Items In Stock:
                     TotalDue = selectedItem.Key.Price;
                     if (selectedItem.Key.Category.ToLower() == "chip")
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("Purchase Made!");
+                        //onsole.WriteLine();
                         selectionMessage = "Crunch Crunch, Yum!";
                     }
                     if (selectedItem.Key.Category.ToLower() == "candy")
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("Purchase Made!");
+                        //Console.WriteLine();
                         selectionMessage = "Munch Munch, Yum!";
                     }
                     if (selectedItem.Key.Category.ToLower() == "drink")
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("Purchase Made!");
+                        //Console.WriteLine();
                         selectionMessage = "Glug Glug, Yum!";
                     }
                     if (selectedItem.Key.Category.ToLower() == "gum")
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("Purchase Made!");
+                        //Console.WriteLine();
                         selectionMessage = "Chew Chew, Yum!";
                     }
-                    
+
                     NumberOfItemLeft = selectedItem.Value;
                     NumberOfItemLeft--;
                     inventory[selectedItem.Key] = NumberOfItemLeft;
@@ -202,36 +338,27 @@ Items In Stock:
                     PreviousBalance = Balance;  // Dean added 10/09/2020 10:50AM
                     Balance -= TotalDue;    // Dean added 10/09/2020 10:50AM
 
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(selectionMessage); // Can CW here or creat another SelectionMessage prop in order to access from Purchase Menu
+                    Console.WriteLine($"You have purchased {selectedItem.Key.Name} for {selectedItem.Key.Price:c}. Thank you for your business!");
+                    Console.ResetColor();
+
+                    //CurrentUserLog();
+                    UpdateCurrentInventoryLog();
                     SalesLog();
                     AddToSoldItems();
-                    //Console.WriteLine($"You have purchased {SelectedItem.Name} for {SelectedItem.Price:c}. Thank you for your business!");
                     GenerateSalesReport();
                 }
                 break;
 
 
             }
-            Console.WriteLine(selectionMessage); // Can CW here or creat another SelectionMessage prop in order to access from Purchase Menu            
+            CurrentUserLog();
+            Console.WriteLine();
+            Console.WriteLine("Press ENTER to return to <Purchase Menu>."); // Can CW here or creat another SelectionMessage prop in order to access from Purchase Menu            
         }
 
-
-        public void Checkout() // Empty the SelectedItem Dictionary and "print out" a receipt; Dean added SalesLog(), AddtoSoldItem() and GenerateSalesReport() => see private methods 
-        {
-            //try
-            //{
-            //SalesLog();            
-            //AddToSoldItems();
-            //Console.WriteLine($"You have purchased {SelectedItem.Name} for {SelectedItem.Price:c}. Thank you for your business!");
-
-            //GenerateSalesReport();
-            SelectedItem = new Item();
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine($"Error: {e.Message} while printing receipt. Checkout failed.");
-            //}
-        }
 
 
         //    decimal TotalSalesAmount;
@@ -259,49 +386,7 @@ Items In Stock:
         //}
 
 
-        public void ReturnChange() //Dean added GiveChangeLog() 10/09/2020 6:25PM;
-        {
-            GiveChangeLog();
-            //int numOfDollars = (int)(Balance * 100 / 100); // Dean changed 10/09/2020 10:50AM
-            //int centsForQuarters = (int)(Balance * 100 % 100); // Dean changed 10/09/2020 10:50AM
-            //int numOfQuarters = centsForQuarters / 25;
-            //int centsForDimes = centsForQuarters % 25;
-            //int numOfDime = centsForDimes / 10;
-            //int centsForNickels = centsForDimes % 10;
-            //int numOfNickels = centsForNickels / 5;
-            //int cents = centsForNickels % 5;
-            //string[] changes = { numOfDollars.ToString(), numOfQuarters.ToString(), numOfDime.ToString(), numOfNickels.ToString(), cents.ToString() };
-            //Console.WriteLine("Returning {change:c}.");
-            //Balance = 0;
-            //return changes;
-        }
-
-
-        public void GenerateSalesReport()
-        {
-            string fileName = "SalesReport.txt";
-            string currentFolder = Environment.CurrentDirectory;
-            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
-
-            using (StreamWriter newReport = new StreamWriter(fullPath, false))
-            {
-                newReport.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-                newReport.WriteLine($"$ Vendo - Matic 800 Sales Report on {DateTime.Now:MM/dd/yyyy hh:mm:ss tt} $");
-                newReport.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-                newReport.WriteLine();
-                foreach (KeyValuePair<Item, int> soldItem in soldItems)
-                {
-                    newReport.WriteLine($"{soldItem.Key.Name,-20}|{soldItem.Value}");
-                    AccumulativeSale += soldItem.Key.Price * soldItem.Value;
-                }
-
-                newReport.WriteLine();
-                newReport.WriteLine($"TOTAL SALE: {AccumulativeSale:c}");
-            }
-        }
-
-
-        private void AddToSoldItems()
+        public void AddToSoldItems()
         {
             int n = 0;
             foreach (KeyValuePair<Item, int> sold in soldItems)
@@ -324,10 +409,56 @@ Items In Stock:
             }
             if (n == 0)
             {
-                soldItems[SelectedItem] = 1;
+                soldItems.Add(SelectedItem, 1);
             }
             //Dictionary<Item, int> soldItemsSorted = (Dictionary<Item, int>)soldItems.OrderBy(i => i.Value);
         }
+
+
+        private void ClearUserLog()
+        {
+            string fileName = "CurrentUserInfo.txt";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamWriter currentUserLog = new StreamWriter(fullPath))
+                {
+                    //newUserLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt}");
+                    //newUserLog.WriteLine($"Balance = {Balance}");
+                    //newUserLog.WriteLine($"SelectedItem = {SelectedItem}");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Out of printing paper. Please help us putting more!");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
+
+
+        private void CurrentUserLog()
+        {
+            string fileName = "CurrentUserInfo.txt";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamWriter currentUserLog = new StreamWriter(fullPath))
+                {
+                    //currentUserLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt}");
+                    currentUserLog.Write(Balance);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Out of printing paper. Please help us putting more!");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
+
 
         private void DepositLog()
         {
@@ -338,7 +469,7 @@ Items In Stock:
             {
                 using (StreamWriter newLog = new StreamWriter(fullPath, true))
                 {
-                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {"FEED MONEY:",-18} {PreviousBalance,-8:c} {Balance:c}");
+                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {"FEED MONEY:",-25} {PreviousBalance,-8:c} {Balance:c}");
                 }
 
             }
@@ -348,6 +479,7 @@ Items In Stock:
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
+
 
         private void GiveChangeLog()
         {
@@ -358,7 +490,7 @@ Items In Stock:
             {
                 using (StreamWriter newLog = new StreamWriter(fullPath, true))
                 {
-                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {"GIVE CHANGE:",-18} {Balance,-8:c} {0:c}");
+                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {"GIVE CHANGE:",-25} {Balance,-8:c} {0:c}");
                 }
 
             }
@@ -368,6 +500,32 @@ Items In Stock:
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
+
+
+        private void ReadCurrentUserLog()
+        {
+            string fileName = "CurrentUserInfo.txt";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamReader currentUserLog = new StreamReader(fullPath))
+                {
+                    while (!currentUserLog.EndOfStream)
+                    {
+                        Balance = Decimal.Parse(currentUserLog.ReadLine());
+                    }
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Out of printing paper. Please help us putting more!");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
+
 
         private void ReadPreviousSalesReport()
         {
@@ -423,7 +581,7 @@ Items In Stock:
             }
         }
 
-        
+
         private void SalesLog()
         {
             string fileName = "log.txt";
@@ -433,7 +591,7 @@ Items In Stock:
             {
                 using (StreamWriter newLog = new StreamWriter(fullPath, true))
                 {
-                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {SelectedItem.Name,-15} {SelectedItem.SlotLocation} {PreviousBalance,-8:c} {Balance:c}");
+                    newLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt} {SelectedItem.Name,-20} {SelectedItem.SlotLocation,-4} {PreviousBalance,-8:c} {Balance:c}");
                 }
 
             }
@@ -443,6 +601,37 @@ Items In Stock:
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
+
+        private void UpdateCurrentInventoryLog()
+        {
+            string fileName = "vendingmachineCurrent.txt";
+            string currentFolder = Environment.CurrentDirectory;
+            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+            try
+            {
+                using (StreamWriter allItemsInTheMachine = new StreamWriter(fullPath)) // Read from the data file and add items to the inventory"
+                {
+                    //A1|Potato Crisps|3.05|Chip
+                    foreach (KeyValuePair<Item, int> eachitem in inventory)
+                    {
+                        allItemsInTheMachine.Write(eachitem.Key.SlotLocation + "|");
+                        allItemsInTheMachine.Write(eachitem.Key.Name + "|");
+                        allItemsInTheMachine.Write(eachitem.Key.Price + "|");
+                        allItemsInTheMachine.Write(eachitem.Key.Category + "|");
+                        allItemsInTheMachine.WriteLine(eachitem.Value);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("OUT OF PAPER.  Please help us reload the paper.");
+                Console.WriteLine("Please check the path and date file name.");
+                Console.WriteLine($"Error: {e.Message}");
+            }
+        }
+
+
+
 
         //private void CleanLog()
         //{
@@ -456,6 +645,4 @@ Items In Stock:
         //}
 
     }
-
-
 }
