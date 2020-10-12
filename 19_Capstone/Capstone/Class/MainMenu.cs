@@ -14,6 +14,7 @@ namespace Capstone.Class
             AddOption("Display Vending Machine Items", OpenInventory);
             AddOption("Purchase", MakePurchase);
             AddOption("Print Sales Report(Employees Only)", PrintSalesReport);
+           // AddOption("Are you an Admin?", AdminPage);
             AddOption("Exit", Exit);
 
 
@@ -44,7 +45,21 @@ namespace Capstone.Class
             });
         }
 
-
+        //private MenuOptionResult AdminPage()
+        //{
+        //    string password = Console.ReadLine();
+        //    if (password == "MikeIsPrettyNeat")
+        //    {
+        //        Console.WriteLine("Hello Administrator!");
+        //        //Stream Reader code
+        //        return MenuOptionResult.WaitAfterMenuSelection;
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("You're not an administator, begone peasant!");
+        //        return MenuOptionResult.WaitAfterMenuSelection;
+        //    }
+        //}
 
         private MenuOptionResult MakePurchase()
         {

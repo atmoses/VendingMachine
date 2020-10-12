@@ -9,11 +9,7 @@ namespace Capstone.Class
     public class PurchaseMenu : ConsoleMenu
     {
         public VendingMachine vendingMachine = new VendingMachine();
-        //private static MenuOptionResult DisplayBalance()
-        //{
-        //    Console.WriteLine("this is a test");
-        //    return MenuOptionResult.WaitAfterMenuSelection;
-        //}
+        
         public PurchaseMenu()
         {            
             AddOption($"Feed Money", AddToBalance);

@@ -1,11 +1,11 @@
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-$ Vendo - Matic 800 Sales Report on 10/11/2020 09:39:12 PM $
+$ Vendo - Matic 800 Sales Report on 10/12/2020 08:56:29 AM $
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 Dr. Salt            |174
 Triplemint          |92
 Mountain Melter     |91
-Potato Crisps       |55
+Potato Crisps       |56
 Crunchie            |53
 U-Chews             |29
 Chiclets            |27
@@ -19,4 +19,4 @@ Cowtales            |5
 Little League Chew  |5
 Cola                |2
 
-TOTAL SALE: $3,163.85
+TOTAL SALE: $1,059.00
