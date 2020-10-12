@@ -182,7 +182,7 @@ namespace Capstone.Class
             string fileName = "SalesReport.txt";
             string currentFolder = Environment.CurrentDirectory;
             string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
-            IOrderedEnumerable<KeyValuePair<Item, int>> sortedSoldItems = from entry in soldItems orderby entry.Value descending select entry;
+            //IOrderedEnumerable<KeyValuePair<Item, int>> sortedSoldItems = from entry in soldItems orderby entry.Value descending select entry;
 
             using (StreamWriter newReport = new StreamWriter(fullPath, false))
             {
@@ -190,7 +190,7 @@ namespace Capstone.Class
                 newReport.WriteLine($"$ Vendo - Matic 800 Sales Report on {DateTime.Now:MM/dd/yyyy hh:mm:ss tt} $");
                 newReport.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
                 newReport.WriteLine();
-                foreach (KeyValuePair<Item, int> soldItem in sortedSoldItems)
+                foreach (KeyValuePair<Item, int> soldItem in soldItems)
                 {
                     newReport.WriteLine($"{soldItem.Key.Name,-20}|{soldItem.Value}");
                     UpToDateSales += soldItem.Key.Price * soldItem.Value;
