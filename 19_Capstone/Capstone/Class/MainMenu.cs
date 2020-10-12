@@ -13,8 +13,8 @@ namespace Capstone.Class
         {
             AddOption("Display Vending Machine Items", OpenInventory);
             AddOption("Purchase", MakePurchase);
-            AddOption("Print Sales Report(Employees Only)", PrintSalesReport);
-           // AddOption("Are you an Admin?", AdminPage);
+            //AddOption("Print Sales Report(Employees Only)", PrintSalesReport);
+            AddOption("Print Sales Report(Employees Only)", AdminPage);
             AddOption("Exit", Exit);
 
 
@@ -45,29 +45,6 @@ namespace Capstone.Class
             });
         }
 
-        //private MenuOptionResult AdminPage()
-        //{
-        //    string password = Console.ReadLine();
-        //    if (password == "MikeIsPrettyNeat")
-        //    {
-        //        Console.WriteLine("Hello Administrator!");
-        //        //Stream Reader code
-        //        return MenuOptionResult.WaitAfterMenuSelection;
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine("You're not an administator, begone peasant!");
-        //        return MenuOptionResult.WaitAfterMenuSelection;
-        //    }
-        //}
-
-        private MenuOptionResult MakePurchase()
-        {
-            PurchaseMenu purchaseMenu = new PurchaseMenu();
-            purchaseMenu.Show();
-            return MenuOptionResult.DoNotWaitAfterMenuSelection;
-        }
-
         private MenuOptionResult OpenInventory()
         {
             VendingMachine vendingMachine = new VendingMachine();
@@ -76,45 +53,68 @@ namespace Capstone.Class
             Console.WriteLine();
             Console.WriteLine("Press ENTER to return to <Main Menu>.");
             return MenuOptionResult.WaitAfterMenuSelection;
+        }        
+
+
+        private MenuOptionResult MakePurchase()
+        {
+            PurchaseMenu purchaseMenu = new PurchaseMenu();
+            purchaseMenu.Show();
+            return MenuOptionResult.DoNotWaitAfterMenuSelection;
         }
 
-        private MenuOptionResult PrintSalesReport()
-        {
-            VendingMachine vendingMaching = new VendingMachine();
-            string fileName = "SalesReport.txt";
-            string currentFolder = Environment.CurrentDirectory;
-            string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            try
+        private MenuOptionResult AdminPage()
+        {
+            Console.Write("Please type the password (pw = MikeIsPrettyNeat) and press ENTER: ");
+            string password = Console.ReadLine();
+            
+            if (password == "MikeIsPrettyNeat")
             {
-                using (StreamReader currentRecord = new StreamReader(fullPath))
+                Console.WriteLine();
+                Console.WriteLine("Hello Administrator!");
+                Console.WriteLine();
+                VendingMachine vendingMaching = new VendingMachine();
+                string fileName = "SalesReport.txt";
+                string currentFolder = Environment.CurrentDirectory;
+                string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                try
                 {
-                    while (!currentRecord.EndOfStream)
+                    using (StreamReader currentRecord = new StreamReader(fullPath))
                     {
-                        Console.WriteLine(currentRecord.ReadLine());
+                        while (!currentRecord.EndOfStream)
+                        {
+                            Console.WriteLine(currentRecord.ReadLine());
+
+                        }
 
                     }
 
                 }
-
+                catch (Exception e)
+                {
+                    Console.WriteLine("Sales data not found. Please check with our sales deparment again (check the path and file name).");
+                    Console.WriteLine($"Error: {e.Message}");
+                }
+                Console.ResetColor();
+                Console.WriteLine();
+                Console.WriteLine("Press ENTER to return to <Main Menu>");
+                return MenuOptionResult.WaitAfterMenuSelection;
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine("Sales data not found. Please check with our sales deparment again (check the path and file name).");
-                Console.WriteLine($"Error: {e.Message}");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("You're not an administator, begone peasant!");
+                Console.ResetColor();
+                return MenuOptionResult.WaitAfterMenuSelection;
             }
-            Console.ResetColor();
-
-            return MenuOptionResult.WaitAfterMenuSelection;
         }
+
 
         private MenuOptionResult Exit()
         {
-            //VendingMachine vendingMachine = new VendingMachine();
-            //Console.WriteLine($"{vendingMachine.DisplayItems()}"); // Got rid of the extra line at the end of the list
-
-            //string fileName;
             string currentFolder = Environment.CurrentDirectory;
             string path = Path.Combine(currentFolder, @"..\..\..\..\");
             File.Delete(Path.Combine(path, "vendingmachineCurrent.txt"));

@@ -14,15 +14,13 @@ namespace Capstone.Class
 {
     public class VendingMachine
     {
-        //public decimal StartingBalance { get; private set; } //Dean commented out 10/09/2020 6:15PM
-
         public decimal Balance { get; private set; }
 
         public string ErrorMessage { get; private set; }
 
         public int NumberOfItemLeft { get; private set; }
 
-        private decimal PreviousBalance { get; set; } // Dean added 10/09/2020 10:50AM
+        private decimal PreviousBalance { get; set; } 
 
         public string Selection { get; private set; }
 
@@ -34,7 +32,7 @@ namespace Capstone.Class
 
         public Dictionary<Item, int> inventory { get; private set; } = new Dictionary<Item, int>();
 
-        public Dictionary<Item, int> soldItems { get; private set; } = new Dictionary<Item, int>(); // Dean added 10/09/2020 6:18PM
+        public Dictionary<Item, int> soldItems { get; private set; } = new Dictionary<Item, int>();
 
 
 
@@ -62,41 +60,6 @@ namespace Capstone.Class
             string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
 
             LoadInventory(fullPath, n);
-
-
-            //try
-            //{
-            //    using (StreamReader allItemsInTheMachine = new StreamReader(fullPath)) // Read from the data file and add items to the inventory"
-            //    {
-            //        while (!allItemsInTheMachine.EndOfStream)
-            //        {
-            //            Item item = new Item();
-            //            string[] eachItem = allItemsInTheMachine.ReadLine().Split("|");
-            //            item.SlotLocation = eachItem[0];
-            //            item.Name = eachItem[1];
-            //            item.Price = decimal.Parse(eachItem[2]);
-            //            item.Category = eachItem[3];
-            //            if (n == 0)
-            //            {
-            //                NumberOfItemLeft = 5;
-            //            }
-            //            else
-            //            {
-            //                NumberOfItemLeft = Int32.Parse(eachItem[4]);
-            //            }
-            //            inventory.Add(item, NumberOfItemLeft);
-            //        }
-            //    }
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("OUT OF ORDER. Our deliver truck was lost in traffic.  Please help us relocate it.");
-            //    Console.WriteLine("Please check the path and date file name.");
-            //    Console.WriteLine($"Error: {e.Message}");
-            //}
-
-            // Load the previous sales report => to keep track of the accumulative sales
             ReadPreviousSalesReport();
 
             // Reload the Balance from the current user
@@ -110,8 +73,6 @@ namespace Capstone.Class
 
         public void Checkout() // Empty the SelectedItem Dictionary and "print out" a receipt; Dean added SalesLog(), AddtoSoldItem() and GenerateSalesReport() => see private methods 
         {
-            //try
-            //{
             //SalesLog();            
             //AddToSoldItems();
             //Console.WriteLine($"You have purchased {SelectedItem.Name} for {SelectedItem.Price:c}. Thank you for your business!");
@@ -120,15 +81,11 @@ namespace Capstone.Class
             //ClearUserLog();
             SelectedItem = new Item();
 
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine($"Error: {e.Message} while printing receipt. Checkout failed.");
-            //}
+            
         }
 
 
-        public void Deposit(decimal deposit) //Dean added DepositLog() 10/09/2020 6:21PM
+        public void Deposit(decimal deposit) 
         {
             if (deposit <= 0) // The use must always input a positive decimal number
             {
@@ -137,14 +94,13 @@ namespace Capstone.Class
             }
             else
             {
-                PreviousBalance = Balance; // Dean added 10/09/2020 10:50AM
+                PreviousBalance = Balance; 
                 Balance += deposit;
                 DepositLog();
             }
 
             CurrentUserLog();
-        } //Dean added DepositLog() 10/09/2020 6:21PM
-
+        }
 
         public List<string> DisplayItems()
         {
@@ -211,13 +167,7 @@ namespace Capstone.Class
                         ErrorMessage = "Not Enough Balance for this Item.  Please press ENTER and return to <Purchase Menu> to deposit more money.";
                         break;
                     }
-                }
-                //else
-                //{
-                //    ErrorMessage = "Item Does Not Exist. Please return to Purchase Menu and select again.";
-                //}
-
-
+                }               
             }
             if (n == 0)
             {
@@ -253,21 +203,10 @@ namespace Capstone.Class
         }
 
 
-        public void ReturnChange() //Dean added GiveChangeLog() 10/09/2020 6:25PM;
+        public void ReturnChange() 
         {
             GiveChangeLog();
-            //int numOfDollars = (int)(Balance * 100 / 100); // Dean changed 10/09/2020 10:50AM
-            //int centsForQuarters = (int)(Balance * 100 % 100); // Dean changed 10/09/2020 10:50AM
-            //int numOfQuarters = centsForQuarters / 25;
-            //int centsForDimes = centsForQuarters % 25;
-            //int numOfDime = centsForDimes / 10;
-            //int centsForNickels = centsForDimes % 10;
-            //int numOfNickels = centsForNickels / 5;
-            //int cents = centsForNickels % 5;
-            //string[] changes = { numOfDollars.ToString(), numOfQuarters.ToString(), numOfDime.ToString(), numOfNickels.ToString(), cents.ToString() };
-            //Console.WriteLine("Returning {change:c}.");
-            //Balance = 0;
-            //return changes;
+            
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$");
             Console.WriteLine();
@@ -351,9 +290,9 @@ namespace Capstone.Class
                     NumberOfItemLeft = selectedItem.Value;
                     NumberOfItemLeft--;
                     inventory[selectedItem.Key] = NumberOfItemLeft;
-                    SelectedItem = selectedItem.Key; // Dean added 10/09/2020 10:50AM
-                    PreviousBalance = Balance;  // Dean added 10/09/2020 10:50AM
-                    Balance -= TotalDue;    // Dean added 10/09/2020 10:50AM
+                    SelectedItem = selectedItem.Key; 
+                    PreviousBalance = Balance;  
+                    Balance -= TotalDue;  
 
                     Console.WriteLine();
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -376,31 +315,6 @@ namespace Capstone.Class
         }
 
 
-        //    decimal TotalSalesAmount;
-        //    fileName = "SalesReport.txt";
-        //    currentFolder = Environment.CurrentDirectory;
-        //    fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
-
-        //    foreach (KeyValuePair<Item, int> item in inventory)
-        //    {
-        //        try
-        //        {
-        //            using (StreamWriter newLog = new StreamWriter(fullPath))
-        //            {
-        //                newLog.WriteLine($"{soldItem.Key.Name,-20}|{soldItem.Value}");
-        //            }
-
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Console.WriteLine("Out of printing paper. Please help us putting more!");
-        //            Console.WriteLine($"Error: {e.Message}");
-        //        }
-        //    }
-
-        //}
-
-
         private void AddToSoldItems()
         {
             int n = 0;
@@ -416,17 +330,11 @@ namespace Capstone.Class
                     soldItems[SelectedItem] = n;
                     break;
                 }
-
-                //if (n == 0)
-                //{
-                //    soldItems[SelectedItem] = 1;
-                //}
             }
             if (n == 0)
             {
                 soldItems.Add(SelectedItem, 1);
-            }
-            //Dictionary<Item, int> soldItemsSorted = (Dictionary<Item, int>)soldItems.OrderBy(i => i.Value);
+            }            
         }
 
 
@@ -438,10 +346,7 @@ namespace Capstone.Class
             try
             {
                 using (StreamWriter currentUserLog = new StreamWriter(fullPath))
-                {
-                    //newUserLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt}");
-                    //newUserLog.WriteLine($"Balance = {Balance}");
-                    //newUserLog.WriteLine($"SelectedItem = {SelectedItem}");
+                {                    
                 }
 
             }
@@ -461,8 +366,7 @@ namespace Capstone.Class
             try
             {
                 using (StreamWriter currentUserLog = new StreamWriter(fullPath))
-                {
-                    //currentUserLog.WriteLine($"{DateTime.Now:MM/dd/yyyy hh:mm:ss tt}");
+                {                    
                     currentUserLog.Write(Balance);
                 }
 
@@ -520,25 +424,7 @@ namespace Capstone.Class
         private void LoadInventory(string fullPath, int n)
         {
             //// Check if there is still an exiting user on the current vending maching
-            //int n;
-            //string fileName;
-            //string currentFolder = Environment.CurrentDirectory;
-            //string path = Path.Combine(currentFolder, @"..\..\..\..\");
-            //if (File.Exists(Path.Combine(path, "vendingmachineCurrent.txt")))
-            //{
-            //    fileName = "vendingmachineCurrent.txt";
-            //    n = 1;
-            //}
-            //else
-            //{
-            //    fileName = "vendingmachine.csv";
-            //    n = 0;
-            //}
-
-            //currentFolder = Environment.CurrentDirectory;
-            //string fullPath = Path.Combine(currentFolder, @"..\..\..\..\", fileName);
-
-
+           
             try
             {
                 using (StreamReader allItemsInTheMachine = new StreamReader(fullPath)) // Read from the data file and add items to the inventory"
@@ -700,9 +586,6 @@ namespace Capstone.Class
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
-
-
-
 
         //private void CleanLog()
         //{
