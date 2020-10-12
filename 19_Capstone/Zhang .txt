@@ -1,3 +1,11 @@
+All tests passed!  The more tests, the better!  -  if you are interested.
+Update the user interface with consistency of the language/instruction
+User data will be kept for the current customer even when choosing to return to <Main Menu> before finish the purchase
+Display at the item selection menu is reflecting the updated inventory status with different color and numbers
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+[Done]
 Furbished our vending machine - let me know what you think!
 
 <MainMenu>

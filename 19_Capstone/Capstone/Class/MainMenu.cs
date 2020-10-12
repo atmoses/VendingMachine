@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Capstone.Class
-{
+{    
     public class MainMenu : ConsoleMenu
-    {
+    {        
         public MainMenu()
         {
             AddOption("Display Vending Machine Items", OpenInventory);
@@ -16,7 +16,7 @@ namespace Capstone.Class
             AddOption("Print Sales Report(Employees Only)", PrintSalesReport);
             AddOption("Exit", Exit);
 
-            
+
             Configure(cfg =>
             {
                 cfg.Title = $@"
@@ -58,6 +58,8 @@ namespace Capstone.Class
             VendingMachine vendingMachine = new VendingMachine();
             //Console.WriteLine($"{vendingMachine.DisplayItems()}"); // Got rid of the extra line at the end of the list
             vendingMachine.DisplayItems();
+            Console.WriteLine();
+            Console.WriteLine("Press ENTER to return to <Main Menu>.");
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
@@ -75,8 +77,8 @@ namespace Capstone.Class
                 {
                     while (!currentRecord.EndOfStream)
                     {
-                        Console.WriteLine(currentRecord.ReadLine()); 
-                        
+                        Console.WriteLine(currentRecord.ReadLine());
+
                     }
 
                 }

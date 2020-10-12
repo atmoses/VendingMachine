@@ -18,7 +18,9 @@ namespace Capstone.Class
         {            
             AddOption($"Feed Money", AddToBalance);
             AddOption("Select Product", SelectItemToPurchase);
-            AddOption("Finish Purchase", FinishPurchase);           
+            AddOption("Finish Purchase", FinishPurchase);
+            AddOption("Return to <Main Menu>", ReturnToMain);
+            Console.WriteLine("Press ESC to return to <Main Menu>");
         }
 
 
@@ -103,7 +105,7 @@ Current Balance is: {vendingMachine.Balance:C}
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
-        public MenuOptionResult AddToBalance()
+        private MenuOptionResult AddToBalance()
         {
 
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -143,6 +145,11 @@ Current Balance is: {vendingMachine.Balance:C}
                 Console.WriteLine("Press ENTER and insert your bill again.");
             }
             return MenuOptionResult.WaitAfterMenuSelection;            
+        }
+
+        private MenuOptionResult ReturnToMain()
+        {
+            return MenuOptionResult.ExitAfterSelection;
         }
 
         
